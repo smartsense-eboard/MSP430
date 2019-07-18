@@ -16,14 +16,13 @@
  */
 void pwm_output(uint16_t onTime)
 {
-    WDTCTL = WDTPW + WDTHOLD; //Disable the Watchdog timer for our convenience.
     P1DIR |= BIT2; //Set pin 1.2 to the output direction.
-    P1SEL1 |= BIT2; //Select pin 1.1 as our PWM output.
+    P1SEL0 |= BIT2; //Select pin 1.1 as our PWM output.
     TA0CCR0 = 20000; //Set the period in the Timer A0 Capture/Compare 0 register to 20 ms.
     TA0CCTL1 = OUTMOD_7;
-    TA0CCR1 = onTime; //The period in microseconds that the power is ON. this is controlable and should be between 1000 us and 2000 us
+    TA0CCR1 = 1500; //The period in microseconds that the power is ON. this is controlable and should be between 1000 us and 2000 us
     TA0CTL = TASSEL_2 + MC_1; //TASSEL_2 selects SMCLK as the clock source, and MC_1 tells it to count up to the value in TA0CCR0.
-    __bis_SR_register(LPM0_bits); //Switch to low power mode 0.
+    //__bis_SR_register(LPM0_bits); //Switch to low power mode 0.
 }
 
 
@@ -31,6 +30,22 @@ int main(void)
 {
 	WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
 	pwm_output(1500);
-
+	__enable_interrupt();
 	return 0;
 }
+/*
+#pragma vector = TIMER0_A0_VECTOR
+__interrupt void Timer0_Toggle_Led( void )
+{
+  if(g_bCurrentLed)
+  {
+      P1OUT ^= BIT2;
+ //   P1OUT &= ~BIT1;
+  }
+  else
+  {
+      P1OUT &= ~BIT2;
+ //   P1OUT ^= BIT1;
+  }
+}
+*/
